@@ -1,0 +1,226 @@
+<!DOCTYPE html>
+<html lang="zh-TW">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>三牌塔羅占卜</title>
+    <style>
+        body { 
+            font-family: 'Arial', sans-serif; 
+            background: linear-gradient(135deg, #667eea 0%, #764ba2 100%); 
+            color: #fff; 
+            text-align: center; 
+            padding: 20px; 
+            min-height: 100vh; 
+        }
+        h1 { font-size: 2.5em; margin-bottom: 30px; text-shadow: 2px 2px 4px rgba(0,0,0,0.5); }
+        #drawBtn { 
+            background: gold; 
+            color: #333; 
+            border: none; 
+            padding: 15px 40px; 
+            font-size: 1.5em; 
+            border-radius: 50px; 
+            cursor: pointer; 
+            box-shadow: 0 8px 25px rgba(0,0,0,0.3); 
+            transition: all 0.3s; 
+            margin-bottom: 40px;
+        }
+        #drawBtn:hover { transform: scale(1.05); box-shadow: 0 12px 35px rgba(0,0,0,0.4); }
+        #spread { 
+            display: flex; 
+            justify-content: space-around; 
+            align-items: center; 
+            max-width: 900px; 
+            margin: 0 auto 40px; 
+            flex-wrap: wrap;
+        }
+        .position { 
+            margin: 0 20px; 
+            text-align: center; 
+            min-width: 250px;
+        }
+        .position-label { 
+            font-size: 1.2em; 
+            margin-bottom: 15px; 
+            color: #ffd700; 
+            font-weight: bold;
+        }
+        .card-container { 
+            perspective: 1000px; 
+            height: 400px; 
+            margin-bottom: 20px;
+        }
+        .card-inner { 
+            width: 220px; 
+            height: 320px; 
+            position: relative; 
+            transform-style: preserve-3d; 
+            transition: transform 1s; 
+            margin: 0 auto;
+        }
+        .card-inner.flipped { transform: rotateY(180deg); }
+        .card-face { 
+            position: absolute; 
+            width: 100%; 
+            height: 100%; 
+            backface-visibility: hidden; 
+            border-radius: 15px; 
+            display: flex; 
+            flex-direction: column; 
+            justify-content: center; 
+            align-items: center; 
+            padding: 20px; 
+            box-shadow: 0 10px 30px rgba(0,0,0,0.5); 
+            font-size: 0.9em;
+        }
+        .back { 
+            background: linear-gradient(45deg, #ff6b6b, #4ecdc4); 
+            font-size: 1em; 
+        }
+        .front { 
+            background: #fff; 
+            color: #333; 
+            transform: rotateY(180deg); 
+        }
+        .front.reversed { transform: rotateY(180deg) rotate(180deg); }
+        .card-name { font-size: 1.3em; font-weight: bold; margin-bottom: 8px; }
+        .card-position { font-size: 1em; color: #e67e22; margin-bottom: 10px; }
+        .card-meaning { line-height: 1.4; text-align: center; }
+        #overall { 
+            background: rgba(255,255,255,0.1); 
+            border-radius: 15px; 
+            padding: 20px; 
+            max-width: 600px; 
+            margin: 20px auto; 
+            backdrop-filter: blur(10px);
+        }
+    </style>
+</head>
+<body>
+    <h1>🃏 三牌塔羅占卜 (過去-現在-未來)</h1>
+    <button id="drawBtn">🔮 開始占卜</button>
+    
+    <div id="spread">
+        <div class="position">
+            <div class="position-label">過去</div>
+            <div class="card-container">
+                <div class="card-inner" id="card1">
+                    <div class="card-face back">背面</div>
+                    <div class="card-face front" id="front1">
+                        <div class="card-name">-</div>
+                        <div class="card-position">-</div>
+                        <div class="card-meaning">-</div>
+                    </div>
+                </div>
+            </div>
+        </div>
+        
+        <div class="position">
+            <div class="position-label">現在</div>
+            <div class="card-container">
+                <div class="card-inner" id="card2">
+                    <div class="card-face back">背面</div>
+                    <div class="card-face front" id="front2">
+                        <div class="card-name">-</div>
+                        <div class="card-position">-</div>
+                        <div class="card-meaning">-</div>
+                    </div>
+                </div>
+            </div>
+        </div>
+        
+        <div class="position">
+            <div class="position-label">未來</div>
+            <div class="card-container">
+                <div class="card-inner" id="card3">
+                    <div class="card-face back">背面</div>
+                    <div class="card-face front" id="front3">
+                        <div class="card-name">-</div>
+                        <div class="card-position">-</div>
+                        <div class="card-meaning">-</div>
+                    </div>
+                </div>
+            </div>
+        </div>
+    </div>
+
+    <div id="overall">
+        <h3 style="margin-top: 0;">綜合解讀</h3>
+        <div id="overallReading">點擊「開始占卜」獲得你的專屬指引</div>
+    </div>
+
+    <script>
+        const tarotCards = [
+            { name: '愚者', upright: '新開始、純真、冒險精神', reversed: '魯莽、猶豫、被愚弄' },
+            { name: '魔術師', upright: '創造力、技巧、行動力', reversed: '欺騙、無能、缺乏自信' },
+            { name: '女祭司', upright: '直覺、神秘、內在智慧', reversed: '隱藏秘密、表裡不一' },
+            { name: '女皇', upright: '豐饒、母性、滋養', reversed: '依賴、窒息、缺乏創造' },
+            { name: '皇帝', upright: '權威、結構、紀律', reversed: '專制、僵化、缺乏控制' },
+            { name: '教宗', upright: '傳統、指導、精神信仰', reversed: '不寬容、謬誤、物質主義' },
+            { name: '戀人', upright: '愛情、選擇、和諧關係', reversed: '不和諧、誘惑、分歧' },
+            { name: '戰車', upright: '勝利、意志力、控制方向', reversed: '失敗、方向錯誤、攻擊性' },
+            { name: '力量', upright: '勇氣、耐心、內在力量', reversed: '弱點、自疑、虐待傾向' },
+            { name: '隱者', upright: '內省、孤獨、尋求智慧', reversed: '孤立、退縮、迴避現實' },
+            { name: '命運之輪', upright: '變化、循環、好運轉機', reversed: '延遲、壞運、抵抗命運' },
+            { name: '正義', upright: '公平、正義、因果平衡', reversed: '不公、不誠實、法律問題' },
+            { name: '倒吊人', upright: '犧牲、放手、新視角', reversed: '停滯、犧牲無謂、固執己見' },
+            { name: '死神', upright: '轉變、結束、新開始', reversed: '抵抗變化、停滯、腐朽' },
+            { name: '節制', upright: '平衡、節制、耐心調和', reversed: '不平衡、過度、衝突對立' },
+            { name: '惡魔', upright: '依戀、物質束縛、誘惑', reversed: '釋放、重獲力量、掙脫枷鎖' },
+            { name: '塔', upright: '突變、混亂、真相揭露', reversed: '避免災難、恐懼改變' },
+            { name: '星星', upright: '希望、靈感、寧靜治癒', reversed: '失望、缺乏信心、無力感' },
+            { name: '月亮', upright: '幻覺、直覺、不確定性', reversed: '清晰、揭露欺騙、真相浮現' },
+            { name: '太陽', upright: '成功、活力、喜悅幸福', reversed: '暫時陰影、缺乏自信' },
+            { name: '審判', upright: '重生、寬恕、覺醒呼喚', reversed: '延遲、自疑、拒絕改變' },
+            { name: '世界', upright: '完成、整合、圓滿成就', reversed: '未完成、延遲、停滯不前' }
+        ];
+
+        const drawBtn = document.getElementById('drawBtn');
+        const cards = ['card1', 'card2', 'card3'];
+        const fronts = ['front1', 'front2', 'front3'];
+        let drawnCards = [];
+
+        drawBtn.addEventListener('click', () => {
+            drawnCards = [];
+            for (let i = 0; i < 3; i++) {
+                const randomIndex = Math.floor(Math.random() * tarotCards.length);
+                const isReversed = Math.random() < 0.5;
+                drawnCards.push({ ...tarotCards[randomIndex], isReversed });
+            }
+
+            // 翻牌動畫
+            cards.forEach((cardId, index) => {
+                const cardInner = document.getElementById(cardId);
+                const front = document.getElementById(fronts[index]);
+                
+                const nameEl = front.querySelector('.card-name');
+                const posEl = front.querySelector('.card-position');
+                const meaningEl = front.querySelector('.card-meaning');
+                
+                const card = drawnCards[index];
+                nameEl.textContent = card.name;
+                posEl.textContent = card.isReversed ? '🔄 逆位' : '☀️ 正位';
+                meaningEl.textContent = card.isReversed ? card.reversed : card.upright;
+                
+                front.classList.toggle('reversed', card.isReversed);
+                cardInner.classList.add('flipped');
+                
+                setTimeout(() => {
+                    cardInner.classList.remove('flipped');
+                }, 2200);
+            });
+
+            // 綜合解讀
+            setTimeout(() => {
+                const past = drawnCards[0].isReversed ? drawnCards[0].reversed : drawnCards[0].upright;
+                const present = drawnCards[1].isReversed ? drawnCards[1].reversed : drawnCards[1].upright;
+                const future = drawnCards[2].isReversed ? drawnCards[2].reversed : drawnCards[2].upright;
+                
+                document.getElementById('overallReading').innerHTML = 
+                    `過去影響：${past}<br><br>現在狀態：${present}<br><br>未來展望：${future}<br><br>💫 <strong>總結：從${drawnCards[0].name}的${drawnCards[0].isReversed?'逆位':'正位'}轉向${drawnCards[2].name}，你的旅程正朝向${future.includes('轉變')||future.includes('新')||future.includes('希望') ? '光明未來' : '需要注意的方向'}前進。</strong>`;
+            }, 1500);
+        });
+    </script>
+</body>
+</html>
